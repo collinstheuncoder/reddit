@@ -1,0 +1,84 @@
+enum Roles {
+  ADMIN
+  MODERATOR
+  USER
+  POSTCREATE
+  POSTUPDATE
+  POSTDELETE
+  SUBCREATE
+  SUBUPDATE
+  SUBDELETE
+  ROLEUPDATE
+}
+
+type User {
+  id: ID! @unique @id
+  username: String! @unique
+  email: String! @unique
+  password: String!
+  image: String
+  followers: [User]!
+  resetToken: String
+  resetTokenExpiry: Float
+  roles: [Roles] @scalarList(strategy: RELATION)
+  posts: [Post!]! @relation(name: "PostsByUser" onDelete: CASCADE)
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+}
+
+type Subreddit {
+  id: ID! @unique @id
+  name: String!
+  path: String! @unique
+  image: String
+  backgroundImage: String
+  moderators: [User!]! @relation(name: "ModsOfSubreddit" onDelete: CASCADE)
+  followers: [User]! @relation(name: "FollowersOfSubreddit" onDelete: CASCADE)
+  posts: [Post!]! @relation(name: "PostsInSubreddit" onDelete: CASCADE)
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+}
+
+type Post {
+  id: ID! @unique @id
+  title: String!
+  description: String!
+  image: String
+  user: User! @relation(name: "PostsByUser")
+  subreddit: Subreddit! @relation(name: "PostsInSubreddit")
+  upvotes: [Upvote!]!
+  downvotes: [Downvote!]!
+  comments: [Comment!]!
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+}
+
+type Comment {
+  id: ID! @unique @id
+  body: String!
+  commentedBy: User!
+  upvotes: [Upvote!]!
+  downvotes: [Downvote!]!
+  post: Post!
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+}
+
+type Upvote {
+  id: ID! @unique @id
+  upvotedBy: User!
+  post: Post
+  comment: Comment
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+}
+
+type Downvote {
+  id: ID! @unique @id
+  downvotedBy: User!
+  post: Post
+  comment: Comment
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+}
+

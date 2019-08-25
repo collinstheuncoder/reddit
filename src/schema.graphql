@@ -1,0 +1,36 @@
+# import * from './generated/prisma.graphql'
+
+type Query {
+  users: [User]!
+  user(where: UserWhereUniqueInput!): User
+  currentUser: User
+  subreddits: [Subreddit]!
+  subreddit(where: SubredditWhereUniqueInput!): Subreddit
+  posts: [Post]!
+  post(where: PostWhereUniqueInput!): Post
+}
+
+type Token {
+  token: String
+}
+
+input SignupInput {
+  email: String!
+  username: String!
+  password: String!
+}
+
+input SigninInput {
+  username: String!
+  password: String!
+}
+
+type Mutation {
+  signup(data: SignupInput!): Token!
+  signin(data: SigninInput!): Token!
+  createSubreddit(data: SubredditCreateInput!, subredditId: String!): Subreddit!
+  createPost(data: PostCreateInput!): Post!
+  createComment(data: CommentCreateInput!): Comment!
+  upvote(data: UpvoteCreateInput!): Boolean!
+  downvote(data: DownvoteCreateInput!): Boolean!
+}
