@@ -24,14 +24,14 @@ server.express.use((req, res, next) => {
   next();
 });
 
-server.express.use(express.static(path.join(__dirname, '../../client/dist')));
+server.express.use(express.static(path.join(__dirname, '../client/dist')));
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === 'production') {
-  server.express.use(express.static('../../client/dist'));
+  server.express.use(express.static('../client/dist'));
 
   server.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../client', 'dist', 'index.html'));
+    res.sendFile(path.join(__dirname, '../client', 'dist', 'index.html'));
   });
 }
 
