@@ -2,8 +2,8 @@ import dotenv from 'dotenv';
 
 const path =
   process.env.NODE_ENV === 'production'
-    ? `${__dirname}/../../.env.production`
-    : `${__dirname}/../../.env.development`;
+    ? `${__dirname}/../../../.env.production`
+    : `${__dirname}/../../../.env.development`;
 
 dotenv.config({
   path,

@@ -6,7 +6,7 @@ import db from './db';
 
 function createServer() {
   return new GraphQLServer({
-    typeDefs: 'src/schema.graphql',
+    typeDefs: 'server/src/schema.graphql',
     resolvers: {
       Query,
       Mutation,

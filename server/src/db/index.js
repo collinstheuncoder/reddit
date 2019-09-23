@@ -5,7 +5,7 @@ import config from '../config';
 const { prismaEndpoint, prismaSecret } = config;
 
 const db = new Prisma({
-  typeDefs: 'src/generated/prisma.graphql',
+  typeDefs: 'server/src/generated/prisma.graphql',
   endpoint: prismaEndpoint,
   secret: prismaSecret,
   debug: false,
