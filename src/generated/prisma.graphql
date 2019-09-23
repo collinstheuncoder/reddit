@@ -1,5 +1,5 @@
 # source: https://us1.prisma.sh/collins-d60450/reddit/dev
-# timestamp: Sun Aug 25 2019 12:13:01 GMT+0100 (GMT+01:00)
+# timestamp: Wed Aug 28 2019 12:54:56 GMT+0100 (GMT+01:00)
 
 type AggregateComment {
   count: Int!
@@ -979,10 +979,16 @@ type PageInfo {
 type Post implements Node {
   id: ID!
   title: String!
-  description: String!
+  description: String
   image: String
-  user: User!
+  link: String
+  postedBy: User!
   subreddit: Subreddit!
+  isOC: Boolean!
+  isNSFW: Boolean!
+  isNSFL: Boolean!
+  isSerious: Boolean!
+  hasSpoiler: Boolean!
   upvotes(where: UpvoteWhereInput, orderBy: UpvoteOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Upvote!]
   downvotes(where: DownvoteWhereInput, orderBy: DownvoteOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Downvote!]
   comments(where: CommentWhereInput, orderBy: CommentOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Comment!]
@@ -1003,22 +1009,28 @@ type PostConnection {
 input PostCreateInput {
   id: ID
   title: String!
-  description: String!
+  description: String
   image: String
-  user: UserCreateOneWithoutPostsInput!
+  link: String
+  isOC: Boolean
+  isNSFW: Boolean
+  isNSFL: Boolean
+  isSerious: Boolean
+  hasSpoiler: Boolean
+  postedBy: UserCreateOneWithoutPostsInput!
   subreddit: SubredditCreateOneWithoutPostsInput!
   upvotes: UpvoteCreateManyWithoutPostInput
   downvotes: DownvoteCreateManyWithoutPostInput
   comments: CommentCreateManyWithoutPostInput
 }
 
-input PostCreateManyWithoutSubredditInput {
-  create: [PostCreateWithoutSubredditInput!]
+input PostCreateManyWithoutPostedByInput {
+  create: [PostCreateWithoutPostedByInput!]
   connect: [PostWhereUniqueInput!]
 }
 
-input PostCreateManyWithoutUserInput {
-  create: [PostCreateWithoutUserInput!]
+input PostCreateManyWithoutSubredditInput {
+  create: [PostCreateWithoutSubredditInput!]
   connect: [PostWhereUniqueInput!]
 }
 
@@ -1040,9 +1052,15 @@ input PostCreateOneWithoutUpvotesInput {
 input PostCreateWithoutCommentsInput {
   id: ID
   title: String!
-  description: String!
+  description: String
   image: String
-  user: UserCreateOneWithoutPostsInput!
+  link: String
+  isOC: Boolean
+  isNSFW: Boolean
+  isNSFL: Boolean
+  isSerious: Boolean
+  hasSpoiler: Boolean
+  postedBy: UserCreateOneWithoutPostsInput!
   subreddit: SubredditCreateOneWithoutPostsInput!
   upvotes: UpvoteCreateManyWithoutPostInput
   downvotes: DownvoteCreateManyWithoutPostInput
@@ -1051,20 +1069,49 @@ input PostCreateWithoutCommentsInput {
 input PostCreateWithoutDownvotesInput {
   id: ID
   title: String!
-  description: String!
+  description: String
   image: String
-  user: UserCreateOneWithoutPostsInput!
+  link: String
+  isOC: Boolean
+  isNSFW: Boolean
+  isNSFL: Boolean
+  isSerious: Boolean
+  hasSpoiler: Boolean
+  postedBy: UserCreateOneWithoutPostsInput!
   subreddit: SubredditCreateOneWithoutPostsInput!
   upvotes: UpvoteCreateManyWithoutPostInput
+  comments: CommentCreateManyWithoutPostInput
+}
+
+input PostCreateWithoutPostedByInput {
+  id: ID
+  title: String!
+  description: String
+  image: String
+  link: String
+  isOC: Boolean
+  isNSFW: Boolean
+  isNSFL: Boolean
+  isSerious: Boolean
+  hasSpoiler: Boolean
+  subreddit: SubredditCreateOneWithoutPostsInput!
+  upvotes: UpvoteCreateManyWithoutPostInput
+  downvotes: DownvoteCreateManyWithoutPostInput
   comments: CommentCreateManyWithoutPostInput
 }
 
 input PostCreateWithoutSubredditInput {
   id: ID
   title: String!
-  description: String!
+  description: String
   image: String
-  user: UserCreateOneWithoutPostsInput!
+  link: String
+  isOC: Boolean
+  isNSFW: Boolean
+  isNSFL: Boolean
+  isSerious: Boolean
+  hasSpoiler: Boolean
+  postedBy: UserCreateOneWithoutPostsInput!
   upvotes: UpvoteCreateManyWithoutPostInput
   downvotes: DownvoteCreateManyWithoutPostInput
   comments: CommentCreateManyWithoutPostInput
@@ -1073,21 +1120,16 @@ input PostCreateWithoutSubredditInput {
 input PostCreateWithoutUpvotesInput {
   id: ID
   title: String!
-  description: String!
+  description: String
   image: String
-  user: UserCreateOneWithoutPostsInput!
+  link: String
+  isOC: Boolean
+  isNSFW: Boolean
+  isNSFL: Boolean
+  isSerious: Boolean
+  hasSpoiler: Boolean
+  postedBy: UserCreateOneWithoutPostsInput!
   subreddit: SubredditCreateOneWithoutPostsInput!
-  downvotes: DownvoteCreateManyWithoutPostInput
-  comments: CommentCreateManyWithoutPostInput
-}
-
-input PostCreateWithoutUserInput {
-  id: ID
-  title: String!
-  description: String!
-  image: String
-  subreddit: SubredditCreateOneWithoutPostsInput!
-  upvotes: UpvoteCreateManyWithoutPostInput
   downvotes: DownvoteCreateManyWithoutPostInput
   comments: CommentCreateManyWithoutPostInput
 }
@@ -1110,6 +1152,18 @@ enum PostOrderByInput {
   description_DESC
   image_ASC
   image_DESC
+  link_ASC
+  link_DESC
+  isOC_ASC
+  isOC_DESC
+  isNSFW_ASC
+  isNSFW_DESC
+  isNSFL_ASC
+  isNSFL_DESC
+  isSerious_ASC
+  isSerious_DESC
+  hasSpoiler_ASC
+  hasSpoiler_DESC
   createdAt_ASC
   createdAt_DESC
   updatedAt_ASC
@@ -1119,8 +1173,14 @@ enum PostOrderByInput {
 type PostPreviousValues {
   id: ID!
   title: String!
-  description: String!
+  description: String
   image: String
+  link: String
+  isOC: Boolean!
+  isNSFW: Boolean!
+  isNSFL: Boolean!
+  isSerious: Boolean!
+  hasSpoiler: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -1294,6 +1354,66 @@ input PostScalarWhereInput {
 
   """All values not ending with the given string."""
   image_not_ends_with: String
+  link: String
+
+  """All values that are not equal to given value."""
+  link_not: String
+
+  """All values that are contained in given list."""
+  link_in: [String!]
+
+  """All values that are not contained in given list."""
+  link_not_in: [String!]
+
+  """All values less than the given value."""
+  link_lt: String
+
+  """All values less than or equal the given value."""
+  link_lte: String
+
+  """All values greater than the given value."""
+  link_gt: String
+
+  """All values greater than or equal the given value."""
+  link_gte: String
+
+  """All values containing the given string."""
+  link_contains: String
+
+  """All values not containing the given string."""
+  link_not_contains: String
+
+  """All values starting with the given string."""
+  link_starts_with: String
+
+  """All values not starting with the given string."""
+  link_not_starts_with: String
+
+  """All values ending with the given string."""
+  link_ends_with: String
+
+  """All values not ending with the given string."""
+  link_not_ends_with: String
+  isOC: Boolean
+
+  """All values that are not equal to given value."""
+  isOC_not: Boolean
+  isNSFW: Boolean
+
+  """All values that are not equal to given value."""
+  isNSFW_not: Boolean
+  isNSFL: Boolean
+
+  """All values that are not equal to given value."""
+  isNSFL_not: Boolean
+  isSerious: Boolean
+
+  """All values that are not equal to given value."""
+  isSerious_not: Boolean
+  hasSpoiler: Boolean
+
+  """All values that are not equal to given value."""
+  hasSpoiler_not: Boolean
   createdAt: DateTime
 
   """All values that are not equal to given value."""
@@ -1381,7 +1501,13 @@ input PostUpdateInput {
   title: String
   description: String
   image: String
-  user: UserUpdateOneRequiredWithoutPostsInput
+  link: String
+  isOC: Boolean
+  isNSFW: Boolean
+  isNSFL: Boolean
+  isSerious: Boolean
+  hasSpoiler: Boolean
+  postedBy: UserUpdateOneRequiredWithoutPostsInput
   subreddit: SubredditUpdateOneRequiredWithoutPostsInput
   upvotes: UpvoteUpdateManyWithoutPostInput
   downvotes: DownvoteUpdateManyWithoutPostInput
@@ -1392,12 +1518,36 @@ input PostUpdateManyDataInput {
   title: String
   description: String
   image: String
+  link: String
+  isOC: Boolean
+  isNSFW: Boolean
+  isNSFL: Boolean
+  isSerious: Boolean
+  hasSpoiler: Boolean
 }
 
 input PostUpdateManyMutationInput {
   title: String
   description: String
   image: String
+  link: String
+  isOC: Boolean
+  isNSFW: Boolean
+  isNSFL: Boolean
+  isSerious: Boolean
+  hasSpoiler: Boolean
+}
+
+input PostUpdateManyWithoutPostedByInput {
+  create: [PostCreateWithoutPostedByInput!]
+  connect: [PostWhereUniqueInput!]
+  set: [PostWhereUniqueInput!]
+  disconnect: [PostWhereUniqueInput!]
+  delete: [PostWhereUniqueInput!]
+  update: [PostUpdateWithWhereUniqueWithoutPostedByInput!]
+  updateMany: [PostUpdateManyWithWhereNestedInput!]
+  deleteMany: [PostScalarWhereInput!]
+  upsert: [PostUpsertWithWhereUniqueWithoutPostedByInput!]
 }
 
 input PostUpdateManyWithoutSubredditInput {
@@ -1410,18 +1560,6 @@ input PostUpdateManyWithoutSubredditInput {
   updateMany: [PostUpdateManyWithWhereNestedInput!]
   deleteMany: [PostScalarWhereInput!]
   upsert: [PostUpsertWithWhereUniqueWithoutSubredditInput!]
-}
-
-input PostUpdateManyWithoutUserInput {
-  create: [PostCreateWithoutUserInput!]
-  connect: [PostWhereUniqueInput!]
-  set: [PostWhereUniqueInput!]
-  disconnect: [PostWhereUniqueInput!]
-  delete: [PostWhereUniqueInput!]
-  update: [PostUpdateWithWhereUniqueWithoutUserInput!]
-  updateMany: [PostUpdateManyWithWhereNestedInput!]
-  deleteMany: [PostScalarWhereInput!]
-  upsert: [PostUpsertWithWhereUniqueWithoutUserInput!]
 }
 
 input PostUpdateManyWithWhereNestedInput {
@@ -1458,7 +1596,13 @@ input PostUpdateWithoutCommentsDataInput {
   title: String
   description: String
   image: String
-  user: UserUpdateOneRequiredWithoutPostsInput
+  link: String
+  isOC: Boolean
+  isNSFW: Boolean
+  isNSFL: Boolean
+  isSerious: Boolean
+  hasSpoiler: Boolean
+  postedBy: UserUpdateOneRequiredWithoutPostsInput
   subreddit: SubredditUpdateOneRequiredWithoutPostsInput
   upvotes: UpvoteUpdateManyWithoutPostInput
   downvotes: DownvoteUpdateManyWithoutPostInput
@@ -1468,9 +1612,31 @@ input PostUpdateWithoutDownvotesDataInput {
   title: String
   description: String
   image: String
-  user: UserUpdateOneRequiredWithoutPostsInput
+  link: String
+  isOC: Boolean
+  isNSFW: Boolean
+  isNSFL: Boolean
+  isSerious: Boolean
+  hasSpoiler: Boolean
+  postedBy: UserUpdateOneRequiredWithoutPostsInput
   subreddit: SubredditUpdateOneRequiredWithoutPostsInput
   upvotes: UpvoteUpdateManyWithoutPostInput
+  comments: CommentUpdateManyWithoutPostInput
+}
+
+input PostUpdateWithoutPostedByDataInput {
+  title: String
+  description: String
+  image: String
+  link: String
+  isOC: Boolean
+  isNSFW: Boolean
+  isNSFL: Boolean
+  isSerious: Boolean
+  hasSpoiler: Boolean
+  subreddit: SubredditUpdateOneRequiredWithoutPostsInput
+  upvotes: UpvoteUpdateManyWithoutPostInput
+  downvotes: DownvoteUpdateManyWithoutPostInput
   comments: CommentUpdateManyWithoutPostInput
 }
 
@@ -1478,7 +1644,13 @@ input PostUpdateWithoutSubredditDataInput {
   title: String
   description: String
   image: String
-  user: UserUpdateOneRequiredWithoutPostsInput
+  link: String
+  isOC: Boolean
+  isNSFW: Boolean
+  isNSFL: Boolean
+  isSerious: Boolean
+  hasSpoiler: Boolean
+  postedBy: UserUpdateOneRequiredWithoutPostsInput
   upvotes: UpvoteUpdateManyWithoutPostInput
   downvotes: DownvoteUpdateManyWithoutPostInput
   comments: CommentUpdateManyWithoutPostInput
@@ -1488,30 +1660,26 @@ input PostUpdateWithoutUpvotesDataInput {
   title: String
   description: String
   image: String
-  user: UserUpdateOneRequiredWithoutPostsInput
+  link: String
+  isOC: Boolean
+  isNSFW: Boolean
+  isNSFL: Boolean
+  isSerious: Boolean
+  hasSpoiler: Boolean
+  postedBy: UserUpdateOneRequiredWithoutPostsInput
   subreddit: SubredditUpdateOneRequiredWithoutPostsInput
   downvotes: DownvoteUpdateManyWithoutPostInput
   comments: CommentUpdateManyWithoutPostInput
 }
 
-input PostUpdateWithoutUserDataInput {
-  title: String
-  description: String
-  image: String
-  subreddit: SubredditUpdateOneRequiredWithoutPostsInput
-  upvotes: UpvoteUpdateManyWithoutPostInput
-  downvotes: DownvoteUpdateManyWithoutPostInput
-  comments: CommentUpdateManyWithoutPostInput
+input PostUpdateWithWhereUniqueWithoutPostedByInput {
+  where: PostWhereUniqueInput!
+  data: PostUpdateWithoutPostedByDataInput!
 }
 
 input PostUpdateWithWhereUniqueWithoutSubredditInput {
   where: PostWhereUniqueInput!
   data: PostUpdateWithoutSubredditDataInput!
-}
-
-input PostUpdateWithWhereUniqueWithoutUserInput {
-  where: PostWhereUniqueInput!
-  data: PostUpdateWithoutUserDataInput!
 }
 
 input PostUpsertWithoutCommentsInput {
@@ -1529,16 +1697,16 @@ input PostUpsertWithoutUpvotesInput {
   create: PostCreateWithoutUpvotesInput!
 }
 
+input PostUpsertWithWhereUniqueWithoutPostedByInput {
+  where: PostWhereUniqueInput!
+  update: PostUpdateWithoutPostedByDataInput!
+  create: PostCreateWithoutPostedByInput!
+}
+
 input PostUpsertWithWhereUniqueWithoutSubredditInput {
   where: PostWhereUniqueInput!
   update: PostUpdateWithoutSubredditDataInput!
   create: PostCreateWithoutSubredditInput!
-}
-
-input PostUpsertWithWhereUniqueWithoutUserInput {
-  where: PostWhereUniqueInput!
-  update: PostUpdateWithoutUserDataInput!
-  create: PostCreateWithoutUserInput!
 }
 
 input PostWhereInput {
@@ -1710,6 +1878,66 @@ input PostWhereInput {
 
   """All values not ending with the given string."""
   image_not_ends_with: String
+  link: String
+
+  """All values that are not equal to given value."""
+  link_not: String
+
+  """All values that are contained in given list."""
+  link_in: [String!]
+
+  """All values that are not contained in given list."""
+  link_not_in: [String!]
+
+  """All values less than the given value."""
+  link_lt: String
+
+  """All values less than or equal the given value."""
+  link_lte: String
+
+  """All values greater than the given value."""
+  link_gt: String
+
+  """All values greater than or equal the given value."""
+  link_gte: String
+
+  """All values containing the given string."""
+  link_contains: String
+
+  """All values not containing the given string."""
+  link_not_contains: String
+
+  """All values starting with the given string."""
+  link_starts_with: String
+
+  """All values not starting with the given string."""
+  link_not_starts_with: String
+
+  """All values ending with the given string."""
+  link_ends_with: String
+
+  """All values not ending with the given string."""
+  link_not_ends_with: String
+  isOC: Boolean
+
+  """All values that are not equal to given value."""
+  isOC_not: Boolean
+  isNSFW: Boolean
+
+  """All values that are not equal to given value."""
+  isNSFW_not: Boolean
+  isNSFL: Boolean
+
+  """All values that are not equal to given value."""
+  isNSFL_not: Boolean
+  isSerious: Boolean
+
+  """All values that are not equal to given value."""
+  isSerious_not: Boolean
+  hasSpoiler: Boolean
+
+  """All values that are not equal to given value."""
+  hasSpoiler_not: Boolean
   createdAt: DateTime
 
   """All values that are not equal to given value."""
@@ -1754,7 +1982,7 @@ input PostWhereInput {
 
   """All values greater than or equal the given value."""
   updatedAt_gte: DateTime
-  user: UserWhereInput
+  postedBy: UserWhereInput
   subreddit: SubredditWhereInput
   upvotes_every: UpvoteWhereInput
   upvotes_some: UpvoteWhereInput
@@ -1814,9 +2042,14 @@ enum Roles {
 type Subreddit implements Node {
   id: ID!
   name: String!
+  description: String
+  topics: [String!]!
+  isNSFW: Boolean!
+  type: [SubredditTypes!]!
   path: String!
   image: String
-  backgroundImage: String
+  headerBgImage: String
+  createdBy: User!
   moderators(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User!]
   followers(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User!]
   posts(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Post!]
@@ -1837,9 +2070,14 @@ type SubredditConnection {
 input SubredditCreateInput {
   id: ID
   name: String!
+  description: String
+  isNSFW: Boolean
   path: String!
   image: String
-  backgroundImage: String
+  headerBgImage: String
+  topics: SubredditCreatetopicsInput
+  type: SubredditCreatetypeInput
+  createdBy: UserCreateOneInput!
   moderators: UserCreateManyInput
   followers: UserCreateManyInput
   posts: PostCreateManyWithoutSubredditInput
@@ -1850,12 +2088,25 @@ input SubredditCreateOneWithoutPostsInput {
   connect: SubredditWhereUniqueInput
 }
 
+input SubredditCreatetopicsInput {
+  set: [String!]
+}
+
+input SubredditCreatetypeInput {
+  set: [SubredditTypes!]
+}
+
 input SubredditCreateWithoutPostsInput {
   id: ID
   name: String!
+  description: String
+  isNSFW: Boolean
   path: String!
   image: String
-  backgroundImage: String
+  headerBgImage: String
+  topics: SubredditCreatetopicsInput
+  type: SubredditCreatetypeInput
+  createdBy: UserCreateOneInput!
   moderators: UserCreateManyInput
   followers: UserCreateManyInput
 }
@@ -1874,12 +2125,16 @@ enum SubredditOrderByInput {
   id_DESC
   name_ASC
   name_DESC
+  description_ASC
+  description_DESC
+  isNSFW_ASC
+  isNSFW_DESC
   path_ASC
   path_DESC
   image_ASC
   image_DESC
-  backgroundImage_ASC
-  backgroundImage_DESC
+  headerBgImage_ASC
+  headerBgImage_DESC
   createdAt_ASC
   createdAt_DESC
   updatedAt_ASC
@@ -1889,9 +2144,13 @@ enum SubredditOrderByInput {
 type SubredditPreviousValues {
   id: ID!
   name: String!
+  description: String
+  topics: [String!]!
+  isNSFW: Boolean!
+  type: [SubredditTypes!]!
   path: String!
   image: String
-  backgroundImage: String
+  headerBgImage: String
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -1933,11 +2192,22 @@ input SubredditSubscriptionWhereInput {
   node: SubredditWhereInput
 }
 
+enum SubredditTypes {
+  PUBLIC
+  PRIVATE
+  RESTRICTED
+}
+
 input SubredditUpdateInput {
   name: String
+  description: String
+  isNSFW: Boolean
   path: String
   image: String
-  backgroundImage: String
+  headerBgImage: String
+  topics: SubredditUpdatetopicsInput
+  type: SubredditUpdatetypeInput
+  createdBy: UserUpdateOneRequiredInput
   moderators: UserUpdateManyInput
   followers: UserUpdateManyInput
   posts: PostUpdateManyWithoutSubredditInput
@@ -1945,9 +2215,13 @@ input SubredditUpdateInput {
 
 input SubredditUpdateManyMutationInput {
   name: String
+  description: String
+  isNSFW: Boolean
   path: String
   image: String
-  backgroundImage: String
+  headerBgImage: String
+  topics: SubredditUpdatetopicsInput
+  type: SubredditUpdatetypeInput
 }
 
 input SubredditUpdateOneRequiredWithoutPostsInput {
@@ -1957,11 +2231,24 @@ input SubredditUpdateOneRequiredWithoutPostsInput {
   upsert: SubredditUpsertWithoutPostsInput
 }
 
+input SubredditUpdatetopicsInput {
+  set: [String!]
+}
+
+input SubredditUpdatetypeInput {
+  set: [SubredditTypes!]
+}
+
 input SubredditUpdateWithoutPostsDataInput {
   name: String
+  description: String
+  isNSFW: Boolean
   path: String
   image: String
-  backgroundImage: String
+  headerBgImage: String
+  topics: SubredditUpdatetopicsInput
+  type: SubredditUpdatetypeInput
+  createdBy: UserUpdateOneRequiredInput
   moderators: UserUpdateManyInput
   followers: UserUpdateManyInput
 }
@@ -2060,6 +2347,50 @@ input SubredditWhereInput {
 
   """All values not ending with the given string."""
   name_not_ends_with: String
+  description: String
+
+  """All values that are not equal to given value."""
+  description_not: String
+
+  """All values that are contained in given list."""
+  description_in: [String!]
+
+  """All values that are not contained in given list."""
+  description_not_in: [String!]
+
+  """All values less than the given value."""
+  description_lt: String
+
+  """All values less than or equal the given value."""
+  description_lte: String
+
+  """All values greater than the given value."""
+  description_gt: String
+
+  """All values greater than or equal the given value."""
+  description_gte: String
+
+  """All values containing the given string."""
+  description_contains: String
+
+  """All values not containing the given string."""
+  description_not_contains: String
+
+  """All values starting with the given string."""
+  description_starts_with: String
+
+  """All values not starting with the given string."""
+  description_not_starts_with: String
+
+  """All values ending with the given string."""
+  description_ends_with: String
+
+  """All values not ending with the given string."""
+  description_not_ends_with: String
+  isNSFW: Boolean
+
+  """All values that are not equal to given value."""
+  isNSFW_not: Boolean
   path: String
 
   """All values that are not equal to given value."""
@@ -2140,46 +2471,46 @@ input SubredditWhereInput {
 
   """All values not ending with the given string."""
   image_not_ends_with: String
-  backgroundImage: String
+  headerBgImage: String
 
   """All values that are not equal to given value."""
-  backgroundImage_not: String
+  headerBgImage_not: String
 
   """All values that are contained in given list."""
-  backgroundImage_in: [String!]
+  headerBgImage_in: [String!]
 
   """All values that are not contained in given list."""
-  backgroundImage_not_in: [String!]
+  headerBgImage_not_in: [String!]
 
   """All values less than the given value."""
-  backgroundImage_lt: String
+  headerBgImage_lt: String
 
   """All values less than or equal the given value."""
-  backgroundImage_lte: String
+  headerBgImage_lte: String
 
   """All values greater than the given value."""
-  backgroundImage_gt: String
+  headerBgImage_gt: String
 
   """All values greater than or equal the given value."""
-  backgroundImage_gte: String
+  headerBgImage_gte: String
 
   """All values containing the given string."""
-  backgroundImage_contains: String
+  headerBgImage_contains: String
 
   """All values not containing the given string."""
-  backgroundImage_not_contains: String
+  headerBgImage_not_contains: String
 
   """All values starting with the given string."""
-  backgroundImage_starts_with: String
+  headerBgImage_starts_with: String
 
   """All values not starting with the given string."""
-  backgroundImage_not_starts_with: String
+  headerBgImage_not_starts_with: String
 
   """All values ending with the given string."""
-  backgroundImage_ends_with: String
+  headerBgImage_ends_with: String
 
   """All values not ending with the given string."""
-  backgroundImage_not_ends_with: String
+  headerBgImage_not_ends_with: String
   createdAt: DateTime
 
   """All values that are not equal to given value."""
@@ -2224,6 +2555,7 @@ input SubredditWhereInput {
 
   """All values greater than or equal the given value."""
   updatedAt_gte: DateTime
+  createdBy: UserWhereInput
   moderators_every: UserWhereInput
   moderators_some: UserWhereInput
   moderators_none: UserWhereInput
@@ -2650,7 +2982,7 @@ input UserCreateInput {
   resetTokenExpiry: Float
   roles: UserCreaterolesInput
   followers: UserCreateManyInput
-  posts: PostCreateManyWithoutUserInput
+  posts: PostCreateManyWithoutPostedByInput
 }
 
 input UserCreateManyInput {
@@ -3090,7 +3422,7 @@ input UserUpdateDataInput {
   resetTokenExpiry: Float
   roles: UserUpdaterolesInput
   followers: UserUpdateManyInput
-  posts: PostUpdateManyWithoutUserInput
+  posts: PostUpdateManyWithoutPostedByInput
 }
 
 input UserUpdateInput {
@@ -3102,7 +3434,7 @@ input UserUpdateInput {
   resetTokenExpiry: Float
   roles: UserUpdaterolesInput
   followers: UserUpdateManyInput
-  posts: PostUpdateManyWithoutUserInput
+  posts: PostUpdateManyWithoutPostedByInput
 }
 
 input UserUpdateManyDataInput {

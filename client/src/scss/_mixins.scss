@@ -1,0 +1,24 @@
+// Media Queries
+@mixin smallDevices {
+	@media (min-width: #{$sm-screen}) {
+		@content;
+	}
+}
+
+@mixin mediumDevices {
+	@media (min-width: #{$md-screen}) {
+		@content;
+	}
+}
+
+@mixin largeDevices {
+	@media (min-width: #{$lg-screen}) {
+		@content;
+	}
+}
+
+@mixin extraLargeDevices {
+	@media (min-width: #{$xl-screen}) {
+		@content;
+	}
+}

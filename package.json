@@ -7,6 +7,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "client": "cd client && yarn serve",
     "start": "nodemon -e js,graphql -x babel-node src/index.js",
     "dev": "nodemon -e js,graphql -x babel-node --inspect src/index.js",
     "test": "jest",

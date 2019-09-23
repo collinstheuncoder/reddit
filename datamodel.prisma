@@ -11,6 +11,12 @@ enum Roles {
   ROLEUPDATE
 }
 
+enum SubredditTypes {
+  PUBLIC
+  PRIVATE
+  RESTRICTED
+}
+
 type User {
   id: ID! @unique @id
   username: String! @unique
@@ -29,9 +35,14 @@ type User {
 type Subreddit {
   id: ID! @unique @id
   name: String!
+  description: String
+  topics: [String]! @scalarList(strategy: RELATION)
+  isNSFW: Boolean! @default(value: false)
+  type: [SubredditTypes] @scalarList(strategy: RELATION)
   path: String! @unique
   image: String
-  backgroundImage: String
+  headerBgImage: String
+  createdBy: User! @relation(name: "SubredditsByUser")
   moderators: [User!]! @relation(name: "ModsOfSubreddit" onDelete: CASCADE)
   followers: [User]! @relation(name: "FollowersOfSubreddit" onDelete: CASCADE)
   posts: [Post!]! @relation(name: "PostsInSubreddit" onDelete: CASCADE)
@@ -42,10 +53,16 @@ type Subreddit {
 type Post {
   id: ID! @unique @id
   title: String!
-  description: String!
+  description: String
   image: String
-  user: User! @relation(name: "PostsByUser")
+  link: String
+  postedBy: User! @relation(name: "PostsByUser")
   subreddit: Subreddit! @relation(name: "PostsInSubreddit")
+  isOC: Boolean! @default(value: false)
+  isNSFW: Boolean! @default(value: false)
+  isNSFL: Boolean! @default(value: false)
+  isSerious: Boolean! @default(value: false)
+  hasSpoiler: Boolean! @default(value: false)
   upvotes: [Upvote!]!
   downvotes: [Downvote!]!
   comments: [Comment!]!
@@ -81,4 +98,3 @@ type Downvote {
   createdAt: DateTime! @createdAt
   updatedAt: DateTime! @updatedAt
 }
-

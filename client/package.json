@@ -14,12 +14,18 @@
     "apollo-link-context": "^1.0.18",
     "apollo-link-error": "^1.1.11",
     "apollo-link-http": "^1.5.15",
+    "bootstrap": "^4.3.1",
+    "bootstrap-vue": "^2.0.0-rc.28",
     "core-js": "^2.6.5",
     "graphql": "^14.5.3",
     "graphql-tag": "^2.10.1",
+    "moment": "^2.24.0",
+    "tiptap": "^1.25.0",
+    "tiptap-extensions": "^1.27.0",
     "vue": "^2.6.10",
     "vue-apollo": "^3.0.0-rc.2",
     "vue-router": "^3.0.3",
+    "vue-select": "^3.1.0",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
@@ -88,5 +94,6 @@
       "vue-cli-service lint",
       "git add"
     ]
-  }
+  },
+  "proxy": "http://localhost:4000"
 }

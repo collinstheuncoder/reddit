@@ -45,18 +45,18 @@ const Mutation = {
 
       const token = authToken(newUser);
 
-      response.cookie('token', token, {
+      response.cookie('reddit-token', token, {
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 * 365,
       });
 
-      return { token };
+      return newUser;
     } catch (error) {
       throw new Error(error.message);
     }
   },
 
-  async signin(
+  async login(
     parent,
     {
       data: { username, password },
@@ -79,12 +79,12 @@ const Mutation = {
 
       const token = authToken(foundUser);
 
-      response.cookie('token', token, {
+      response.cookie('reddit-token', token, {
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 * 365,
       });
 
-      return { token };
+      return foundUser;
     } catch (error) {
       throw new Error(error.message);
     }
@@ -92,19 +92,7 @@ const Mutation = {
 
   async createSubreddit(parent, { data }, { db }, info) {
     try {
-      const newSubreddit = await db.mutation.createSubreddit(
-        {
-          data: {
-            ...data,
-            user: {
-              connect: {
-                id: userId,
-              },
-            },
-          },
-        },
-        info
-      );
+      const newSubreddit = await db.mutation.createSubreddit({ data }, info);
 
       return newSubreddit;
     } catch (error) {
@@ -112,26 +100,9 @@ const Mutation = {
     }
   },
 
-  async createPost(parent, { data, subredditId }, { db }, info) {
+  async createPost(parent, { data }, { db }, info) {
     try {
-      const newPost = await db.mutation.createPost(
-        {
-          data: {
-            ...data,
-            user: {
-              connect: {
-                id: userId,
-              },
-            },
-            subreddit: {
-              connect: {
-                id: subredditId,
-              },
-            },
-          },
-        },
-        info
-      );
+      const newPost = await db.mutation.createPost({ data }, info);
 
       return newPost;
     } catch (error) {
